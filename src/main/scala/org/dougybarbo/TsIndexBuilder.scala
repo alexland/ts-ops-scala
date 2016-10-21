@@ -44,32 +44,59 @@ implicitly[LocalDateTime ∈ DateOrDateTime]
  * LocalDateTime.now or LocalDate.now
  * creates one row of the 2D timeseries index for each timeseries record
  */
-def createTsRowIdx[A](record:A)(implicit ev: A ∈ DateOrDateTime):Array[Int] = {
+def createTsRowIdx[A]
+  (record:A)
+  (implicit ev: A ∈ DateOrDateTime):TimeSeriesRowIndex = {
   record match {
     case t: LocaDateTime => dateTimeObjAttrs(t)
     case d: LocalDate => dateObjAttrs(d)
   }
 }
 
+case class TimeSeriesRowIndex(
+  year:Int,
+  month:Int,
+  dayOfMonth:Int,
+  dayOfWeek:Int,
+  hour:Int,
+  minute:Int,
+  second:Int,
+  nanoSecond:Int
+)
+
+
+/**
+ *
+ */
 def dateTimeObjAttrs(record:LocalDateTime) = {
-  val buf = new ArrayBuffer[Int]()
-  buf += record.getYear
-  buf += record.getMonthValue
-  buf += record.getDayOfMonth
-  buf += LutWeekDay(record.getDayOfWeek.toString)
-  buf += record.getHour
-  buf += record.getMinute
-  buf += record.getSecond
-  buf += record.getNano
-  buf.toArray
+  TimeSeriesRowIndex(
+    year=record.getYear,
+    month=record.getMonthValue,
+    dayOfMonth=record.getDayOfMonth,
+    dayOfWeek=LutWeekDay(record.getDayOfWeek.toString),
+    hour=record.getHour,
+    minute=record.getMinute,
+    second=record.getSecond,
+    nanoSecond=record.getNano
+  )
 }
 
+
+/**
+ *
+ */
 def dateObjAttrs(record:LocalDate) = {
-  val buf = new ArrayBuffer[Int]()
-  buf += record.getYear
-  buf += record.getMonthValue
-  buf += record.getDayOfMonth
-  buf += LutWeekDay(record.getDayOfWeek.toString)
-  buf ++= ArrayBuffer(0, 0, 0, 0)
-  buf.toArray
+  TimeSeriesRowIndex(
+    year=record.getYear,
+    month=record.getMonthValue,
+    dayOfMonth=record.getDayOfMonth,
+    dayOfWeek=LutWeekDay(record.getDayOfWeek.toString),
+    hour=0,
+    minute=0,
+    second=0,
+    nanoSecond=0
+  )
 }
+
+
+def createTsIdx
